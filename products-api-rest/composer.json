@@ -1,0 +1,24 @@
+{
+    "name": "ineziiaah/products-api-rest",
+    "description": "API Rest",
+    "autoload": {
+        "psr-4": {
+            "Ineziiaah\\ProductsApiRest\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "erwan didi",
+            "email": "furiouse693@gmail.com"
+        }
+    ],
+    "scripts": {
+      "start": "php -S localhost:8005 -t public/ public/index.php"
+    },
+    "config": {
+      "process-timeout": 0
+    },
+    "require": {
+      "symfony/dotenv": "^6.2"
+    }
+}
