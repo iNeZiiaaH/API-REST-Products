@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Crud\Exception;
+namespace App\Exception;
 
 use App\httpCode\ResponseCode;
 use Exception;

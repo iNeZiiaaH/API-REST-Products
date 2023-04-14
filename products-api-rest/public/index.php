@@ -6,6 +6,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use App\Config\DbInitializer;
 use App\Config\ExceptionHandlerInitializer;
 use App\Exception\UnprocessableContentException;
+use App\Exception\InternalServerError;
+use App\Exception\NotFound;
 use App\Crud\ProductsCrud;
 use App\httpCode\ResponseCode;
 use Symfony\Component\Dotenv\Dotenv;
@@ -38,6 +40,9 @@ if ($uri === '/products' && $httpMethod === 'GET') {
 if ($uri === '/products' && $httpMethod === 'POST') {
   $data = json_decode(file_get_contents('php://input'), true);
   $productId = $productsCrud->create($data);
+  http_response_code(ResponseCode::CREATED);
+  echo json_encode(['message' => 'Product successfully created','id' => $productId]);
+  exit;
 }
 
 
@@ -62,23 +67,55 @@ if ($id === 0) {
 }
 
 if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'GET') {
-
-  echo json_encode($productsCrud->find($id));
+  $productsCrud = new ProductsCrud($pdo);
+  try {
+    $product = $productsCrud->find($id);
+    echo json_encode($product);
+  } catch (NotFound $e) {
+    http_response_code(ResponseCode::NOT_FOUND);
+    echo json_encode(['error' => $e->getMessage()]);
+  }
+  exit;
 }
 
+// Pour modifier le produit, on utilise la méthode 'PUT'
 if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'PUT') {
   $data = json_decode(file_get_contents('php://input'), true);
+  // Je vien récupérer ma classe ProductsCrud pour ensuite récupérer la méthode update
+  $productsCrud = new ProductsCrud($pdo);
 
-  if (!isset($data['name']) || !isset($data['basePrice'])) {
-    http_response_code(422);
-    echo json_encode([
-      'error' => 'Name and base price are required'
-    ]);
-    exit;
+  // je vien gérer mes erreurs en entourant ma méthode update
+  try {
+    $productsCrud->update($id, $data);
+    http_response_code(ResponseCode::OK);
+    echo json_encode(['message' => 'Product successfully updated']);
+  } catch (NotFound $e) {
+    http_response_code(ResponseCode::NOT_FOUND);
+    echo json_encode(['error' => $e->getMessage()]);
+  } catch (InternalServerError $e) {
+    http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
+    echo json_encode(['error' => $e->getMessage()]);
+  } catch (UnprocessableContentException $e) {
+    http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
+    echo json_encode(['error' => $e->getMessage()]);
   }
-  echo json_encode($productsCrud->update($id, $data));
+  exit;
 }
 
+
+// On vient supprimé le produit avec la méthode 'DELETE'
 if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'DELETE') {
-  echo json_encode($productsCrud->delete($id));
+  $productsCrud = new ProductsCrud($pdo);
+  try {
+    $productsCrud->delete($id);
+    http_response_code(ResponseCode::OK);
+    echo json_encode(['message' => 'Product successfully deleted']);
+  } catch (NotFound $e) {
+    http_response_code(ResponseCode::NOT_FOUND);
+    echo json_encode(['error' => $e->getMessage()]);
+  } catch (InternalServerError $e) {
+    http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
+    echo json_encode(['error' => $e->getMessage()]);
+  }
+  exit;
 }
