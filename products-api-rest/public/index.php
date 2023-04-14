@@ -39,11 +39,20 @@ if ($uri === '/products' && $httpMethod === 'GET') {
 // Création de produit
 if ($uri === '/products' && $httpMethod === 'POST') {
   $data = json_decode(file_get_contents('php://input'), true);
-  $productId = $productsCrud->create($data);
-  http_response_code(ResponseCode::CREATED);
-  echo json_encode(['message' => 'Product successfully created','id' => $productId]);
+  try {
+      $productId = $productsCrud->create($data);
+      http_response_code(ResponseCode::CREATED);
+      echo json_encode(['message' => 'Product successfully created', 'id' => $productId]);
+  } catch (UnprocessableContentException $e) {
+      http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
+      echo json_encode(['error' => $e->getMessage()]);
+  } catch (InternalServerError $e) {
+      http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
+      echo json_encode(['error' => $e->getMessage()]);
+  }
   exit;
 }
+
 
 
 // Identifie si on est sur une opération sur un élément
