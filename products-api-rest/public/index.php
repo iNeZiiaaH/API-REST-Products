@@ -40,20 +40,18 @@ if ($uri === '/products' && $httpMethod === 'GET') {
 if ($uri === '/products' && $httpMethod === 'POST') {
   $data = json_decode(file_get_contents('php://input'), true);
   try {
-      $productId = $productsCrud->create($data);
-      http_response_code(ResponseCode::CREATED);
-      echo json_encode(['message' => 'Product successfully created', 'id' => $productId]);
+    $productId = $productsCrud->create($data);
+    http_response_code(ResponseCode::CREATED);
+    echo json_encode(['message' => 'Product successfully created', 'id' => $productId]);
   } catch (UnprocessableContentException $e) {
-      http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
-      echo json_encode(['error' => $e->getMessage()]);
+    http_response_code(ResponseCode::UNPROCESSABLE_CONTENT);
+    echo json_encode(['error' => $e->getMessage()]);
   } catch (InternalServerError $e) {
-      http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
-      echo json_encode(['error' => $e->getMessage()]);
+    http_response_code(ResponseCode::INTERNAL_SERVER_ERROR);
+    echo json_encode(['error' => $e->getMessage()]);
   }
   exit;
 }
-
-
 
 // Identifie si on est sur une opération sur un élément
 if (!$isItemOperation) {
@@ -75,6 +73,7 @@ if ($id === 0) {
   exit;
 }
 
+// Méthode pour afficher un seul produit
 if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'GET') {
   $productsCrud = new ProductsCrud($pdo);
   try {
@@ -110,7 +109,6 @@ if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'PUT') {
   }
   exit;
 }
-
 
 // On vient supprimé le produit avec la méthode 'DELETE'
 if ($resourceName === 'products' && $isItemOperation && $httpMethod === 'DELETE') {
