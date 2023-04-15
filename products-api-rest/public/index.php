@@ -39,6 +39,7 @@ if ($uri === '/products' && $httpMethod === 'GET') {
 // Création de produit
 if ($uri === '/products' && $httpMethod === 'POST') {
   $data = json_decode(file_get_contents('php://input'), true);
+  $productsCrud = new ProductsCrud($pdo);
   try {
     $productId = $productsCrud->create($data);
     http_response_code(ResponseCode::CREATED);
